@@ -2,14 +2,17 @@ const express = require("express");
 const app = express();
 const mysql = require("mysql2");
 
+require("dotenv").config();
+const env = process.env;
+
 app.use(express.json());
 
 const db = mysql.createConnection({
-    user: "root",
-    host: "localhost",
-    password: "",
-    database: "js_crud_test",
-    port: 3306,
+    user: env.DB_USERNAME,
+    host: env.DB_HOST,
+    password: env.DB_PASSWORD,
+    database: env.DB_DATABASE,
+    port: env.DB_PORT,
 });
 
 app.get("/", (req, res) => {
@@ -23,8 +26,7 @@ app.post("/todo", (req, res) => {
     if (!content) {
         return res.status(400).send({ error: "content is required" });
     }
-
-    const query = "INSERT INTO todos (content) VALUES (?)";
+    const query = `INSERT INTO ${env.DB_TABLE} (content) VALUES (?)`;
     db.query(query, [content], (err, result) => {
         if (err) {
             console.error(err);
@@ -39,7 +41,7 @@ app.post("/todo", (req, res) => {
 
 // Read
 app.get("/todo", (req, res) => {
-    const query = "SELECT * FROM todos";
+    const query = `SELECT * FROM ${env.DB_TABLE}`;
     db.query(query, (err, result) => {
         if (err) {
             console.error(err);
@@ -57,7 +59,7 @@ app.put("/todo/:id", (req, res) => {
     const id = req.params.id;
     const content = req.body.content;
 
-    const query = "UPDATE todos SET content = ? WHERE id = ?";
+    const query = `UPDATE ${env.DB_TABLE} SET content = ? WHERE id = ?`;
     db.query(query, [content, id], (err, result) => {
         if (err) {
             console.error(err);
@@ -72,7 +74,7 @@ app.put("/todo/:id", (req, res) => {
 app.delete("/todo/:id", (req, res) => {
     const id = req.params.id;
 
-    const query = "DELETE FROM todos WHERE id = ?";
+    const query = `DELETE FROM ${env.DB_TABLE} WHERE id = ?`;
     db.query(query, [id], (err, result) => {
         if (err) {
             console.error(err);
